@@ -1,0 +1,101 @@
+/* 애플 스타일 폰트 적용 - 강제 로드 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Tailwind 폰트 완전 덮어쓰기 */
+@layer base {
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  }
+}
+
+@layer utilities {
+  .font-sans {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  }
+  
+  .font-inter {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+  }
+}
+
+body {
+  font-family: 'Noto Sans', 'Inter', sans-serif !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-smoothing: antialiased;
+  letter-spacing: -0.016em;
+  font-weight: 400;
+  line-height: 1.5;
+  font-feature-settings: "liga", "kern";
+}
+
+/* 모든 텍스트 요소에 강제 적용 */
+* {
+  font-family: 'Noto Sans', 'Inter', sans-serif !important;
+}
+
+/* 특별히 강조할 요소들 */
+.font-change-test {
+  font-family: 'Noto Sans', 'Inter', sans-serif !important;
+  background-color: yellow !important;
+  padding: 2px 4px !important;
+}
+
+/* 제목 폰트 최적화 */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  letter-spacing: -0.028em;
+  line-height: 1.2;
+}
+
+h1 { font-size: 2.5rem; font-weight: 700; }
+h2 { font-size: 2rem; font-weight: 600; }
+h3 { font-size: 1.75rem; font-weight: 600; }
+
+/* 버튼 폰트 최적화 */
+button {
+  font-weight: 500;
+  letter-spacing: -0.016em;
+  font-size: 1rem;
+}
+
+/* 입력 필드 폰트 최적화 */
+input, textarea, select {
+  letter-spacing: -0.016em;
+  font-weight: 400;
+}
+
+/* 테이블 텍스트 */
+table, th, td {
+  letter-spacing: -0.016em;
+}
+
+/* 작은 텍스트 */
+.text-sm, small {
+  letter-spacing: -0.012em;
+}
+
+/* 굵은 텍스트 */
+strong, b {
+  font-weight: 600;
+  letter-spacing: -0.020em;
+}
+
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}

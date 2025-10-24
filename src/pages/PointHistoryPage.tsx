@@ -1,0 +1,904 @@
+import { useState, useEffect } from 'react';
+import {
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  DollarSign,
+  Filter,
+  Search,
+  Loader2,
+  AlertCircle,
+  Users,
+  BarChart3,
+  CreditCard,
+  ArrowUpCircle,
+  ArrowDownCircle,
+  Award,
+  UserCheck,
+  Settings,
+  ArrowLeft,
+  RefreshCw
+} from 'lucide-react';
+import { useAuth } from '../hooks/useAuth';
+
+interface PointBalance {
+  id: number;
+  user_id: number;
+  available_points: number;
+  pending_points: number;
+  total_earned: number;
+  total_spent: number;
+  actual_spent?: number; // 실제 사용 포인트 (승인된 리뷰만)
+  total_subtracted?: number; // 회수된 포인트 (admin_subtract 합계)
+  username: string;
+  name: string;
+  role: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+interface PointTransaction {
+  id: number;
+  user_id: number;
+  transaction_type: 'spend' | 'refund' | 'admin_add' | 'admin_subtract';
+  amount: number;
+  balance_before: number;
+  balance_after: number;
+  related_work_id: number | null;
+  related_request_id: number | null;
+  description: string;
+  processed_by: number | null;
+  created_at: string;
+  username: string;
+  name: string;
+  processor_name: string | null;
+  work_title: string | null;
+  request_purpose: string | null;
+}
+
+interface PointStatistics {
+  total_stats: {
+    total_available: number;
+    total_pending: number;
+    total_earned: number;
+    total_spent: number;
+    total_users: number;
+  };
+  period_stats: Array<{
+    transaction_type: string;
+    transaction_count: number;
+    total_added: number;
+    total_removed: number;
+  }>;
+  top_users: Array<{
+    name: string;
+    username: string;
+    role: string;
+    available_points: number;
+    total_earned: number;
+  }>;
+  daily_trends: Array<{
+    date: string;
+    points_added: number;
+    points_removed: number;
+    transaction_count: number;
+  }>;
+}
+
+export function PointHistoryPage() {
+  const { user } = useAuth();
+  const [balance, setBalance] = useState<PointBalance | null>(null);
+  const [transactions, setTransactions] = useState<PointTransaction[]>([]);
+  const [allTransactions, setAllTransactions] = useState<PointTransaction[]>([]); // 전체 거래내역 (회수 포인트 계산용)
+  const [statistics, setStatistics] = useState<PointStatistics | null>(null);
+  const [balances, setBalances] = useState<PointBalance[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // 필터 상태
+  const [transactionTypeFilter, setTransactionTypeFilter] = useState<string>('all');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+
+  // 포인트 조정 모달
+  const [showAdjustModal, setShowAdjustModal] = useState(false);
+  const [adjustForm, setAdjustForm] = useState({
+    user_id: '',
+    amount: '',
+    description: ''
+  });
+  const [submitting, setSubmitting] = useState(false);
+  const [selectedUserDetail, setSelectedUserDetail] = useState<number | null>(null); // 상세보기 선택된 사용자
+
+  const isAdmin = user?.role === 'admin' || user?.role === 'developer';
+
+  useEffect(() => {
+    if (!isAdmin) {
+      // 사용자는 잔액 + 거래내역 모두 필요
+      fetchBalance();
+      fetchTransactions();
+    } else {
+      // 관리자는 초기에 전체 사용자 목록 로드
+      fetchBalances();
+
+      // 상세 뷰일 때만 해당 사용자 데이터 로드
+      if (selectedUserDetail) {
+        fetchBalance();
+        fetchTransactions();
+      }
+    }
+  }, [selectedUserDetail, transactionTypeFilter, dateRange, selectedUserId, isAdmin]);
+
+  const fetchBalance = async () => {
+    try {
+      setLoading(true);
+      const authData = localStorage.getItem('adr_auth');
+      const { token } = authData ? JSON.parse(authData) : {};
+
+      const params = new URLSearchParams();
+      if (selectedUserId && isAdmin) {
+        params.append('user_id', selectedUserId);
+      }
+
+      // 잔액 정보 조회
+      const balanceResponse = await fetch(`http://localhost:3001/api/points/balance?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (balanceResponse.ok) {
+        const balanceData = await balanceResponse.json();
+        setBalance(balanceData.data);
+      }
+
+      // 전체 거래 내역 조회 (사용/회수 분리 계산용)
+      const txParams = new URLSearchParams();
+      if (selectedUserId && isAdmin) {
+        txParams.append('user_id', selectedUserId);
+      }
+      txParams.append('limit', '1000'); // 전체 조회
+
+      const txResponse = await fetch(`http://localhost:3001/api/points/transactions?${txParams}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (txResponse.ok) {
+        const txData = await txResponse.json();
+        setAllTransactions(txData.data.transactions);
+      }
+    } catch (error) {
+      console.error('포인트 잔액 조회 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const authData = localStorage.getItem('adr_auth');
+      const { token } = authData ? JSON.parse(authData) : {};
+
+      const params = new URLSearchParams();
+      if (selectedUserId && isAdmin) {
+        params.append('user_id', selectedUserId);
+      }
+      if (transactionTypeFilter !== 'all') {
+        params.append('transaction_type', transactionTypeFilter);
+      }
+      if (dateRange.start) {
+        params.append('start_date', dateRange.start);
+      }
+      if (dateRange.end) {
+        params.append('end_date', dateRange.end);
+      }
+
+      const response = await fetch(`http://localhost:3001/api/points/transactions?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTransactions(data.data.transactions);
+      }
+    } catch (error) {
+      console.error('포인트 거래 내역 조회 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStatistics = async () => {
+    try {
+      setLoading(true);
+      const authData = localStorage.getItem('adr_auth');
+      const { token } = authData ? JSON.parse(authData) : {};
+
+      const response = await fetch('http://localhost:3001/api/points/statistics', {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setStatistics(data.data);
+      }
+    } catch (error) {
+      console.error('포인트 통계 조회 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchBalances = async () => {
+    try {
+      setLoading(true);
+      const authData = localStorage.getItem('adr_auth');
+      const { token } = authData ? JSON.parse(authData) : {};
+
+      const params = new URLSearchParams();
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
+
+      const response = await fetch(`http://localhost:3001/api/points/balances?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setBalances(data.data.balances);
+      }
+    } catch (error) {
+      console.error('포인트 잔액 목록 조회 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const adjustPoints = async () => {
+    try {
+      setSubmitting(true);
+      const authData = localStorage.getItem('adr_auth');
+      const { token } = authData ? JSON.parse(authData) : {};
+
+      const response = await fetch('http://localhost:3001/api/points/adjust', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          user_id: parseInt(adjustForm.user_id),
+          amount: parseInt(adjustForm.amount),
+          description: adjustForm.description
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setShowAdjustModal(false);
+        setAdjustForm({ user_id: '', amount: '', description: '' });
+        alert(result.message);
+
+        // 목록 새로고침
+        if (selectedUserDetail) {
+          fetchBalance();
+        } else {
+          fetchBalances();
+        }
+      } else {
+        const error = await response.json();
+        alert(error.message || '포인트 조정에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('포인트 조정 실패:', error);
+      alert('포인트 조정 중 오류가 발생했습니다.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const formatAmount = (amount: number) => {
+    return new Intl.NumberFormat('ko-KR').format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString('ko-KR');
+  };
+
+  const getTransactionTypeBadge = (type: string) => {
+    const badges = {
+      spend: { bg: 'bg-red-100', text: 'text-red-700', icon: ArrowDownCircle, label: '사용' },
+      refund: { bg: 'bg-green-100', text: 'text-green-700', icon: ArrowUpCircle, label: '환불' },
+      admin_add: { bg: 'bg-blue-100', text: 'text-blue-700', icon: UserCheck, label: '발급' },
+      admin_subtract: { bg: 'bg-orange-100', text: 'text-orange-700', icon: UserCheck, label: '회수' }
+    };
+    const badge = badges[type as keyof typeof badges] || {
+      bg: 'bg-gray-100',
+      text: 'text-gray-700',
+      icon: AlertCircle,
+      label: type
+    };
+    const Icon = badge.icon;
+
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+        <Icon className="w-3 h-3 mr-1" />
+        {badge.label}
+      </span>
+    );
+  };
+
+  const getRoleBadge = (role: string) => {
+    const badges = {
+      admin: { bg: 'bg-red-100', text: 'text-red-700', label: '관리자' },
+      distributor: { bg: 'bg-purple-100', text: 'text-purple-700', label: '총판' },
+      advertiser: { bg: 'bg-orange-100', text: 'text-orange-700', label: '광고주' },
+      writer: { bg: 'bg-green-100', text: 'text-green-700', label: '작성자' }
+    };
+    const badge = badges[role as keyof typeof badges] || { bg: 'bg-gray-100', text: 'text-gray-700', label: role };
+
+    return (
+      <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${badge.bg} ${badge.text}`}>
+        {badge.label}
+      </span>
+    );
+  };
+
+  return (
+    <div className="p-6">
+      {/* 헤더 */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">포인트 관리</h1>
+        {isAdmin && selectedUserDetail ? (
+          // 관리자 상세보기 - 뒤로가기 버튼 + 사용자 정보
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setSelectedUserDetail(null)}
+              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              목록으로 돌아가기
+            </button>
+            <p className="text-xl font-semibold text-gray-700">
+              {balance?.name || '사용자'} (@{balance?.username})
+            </p>
+          </div>
+        ) : (
+          // 기본 헤더
+          <p className="text-gray-600">포인트 잔액과 거래 내역을 확인할 수 있습니다.</p>
+        )}
+      </div>
+
+      {/* 사용자용 통합 뷰 (잔액 + 거래내역) */}
+      {!isAdmin && (
+        <div className="space-y-6">
+          {/* 잔액 카드 */}
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+            </div>
+          ) : balance ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-gray-600">사용 가능 포인트</h3>
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{formatAmount(balance.available_points)} P</p>
+                <p className="text-xs text-gray-500 mt-1">즉시 사용 가능</p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-gray-600">대기 중 포인트</h3>
+                  <Calendar className="w-5 h-5 text-yellow-600" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{formatAmount(balance.pending_points)} P</p>
+                <p className="text-xs text-gray-500 mt-1">검수 대기 중</p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-gray-600">총 획득 포인트</h3>
+                  <TrendingUp className="w-5 h-5 text-blue-600" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{formatAmount(balance.total_earned)} P</p>
+                <p className="text-xs text-gray-500 mt-1">누적 획득</p>
+              </div>
+
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-gray-600">총 사용 포인트</h3>
+                  <ArrowDownCircle className="w-5 h-5 text-indigo-600" />
+                </div>
+                <p className="text-3xl font-bold text-gray-900">{formatAmount(balance.actual_spent || 0)} P</p>
+                <p className="text-xs text-gray-500 mt-1">승인된 리뷰 포인트</p>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">포인트 정보를 불러올 수 없습니다.</p>
+            </div>
+          )}
+
+          {/* 거래 내역 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h2 className="text-lg font-semibold text-gray-900">거래 내역</h2>
+            </div>
+
+            {/* 필터 */}
+            <div className="p-4 bg-gray-50 border-b border-gray-200">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">거래 유형</label>
+                  <select
+                    value={transactionTypeFilter}
+                    onChange={(e) => setTransactionTypeFilter(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="all">전체</option>
+                    <option value="spend">사용</option>
+                    <option value="refund">환불</option>
+                    <option value="admin_add">발급</option>
+                    <option value="admin_subtract">회수</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">시작일</label>
+                  <input
+                    type="date"
+                    value={dateRange.start}
+                    onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">종료일</label>
+                  <input
+                    type="date"
+                    value={dateRange.end}
+                    onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">검색</label>
+                  <input
+                    type="text"
+                    placeholder="설명 검색..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">유형</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">설명</th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">금액</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">일시</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {transactions.filter(tx => {
+                      // 검색어 필터
+                      if (searchTerm && !tx.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+                        return false;
+                      }
+                      return true;
+                    }).length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                          {searchTerm ? '검색 결과가 없습니다.' : '거래 내역이 없습니다.'}
+                        </td>
+                      </tr>
+                    ) : (
+                      transactions.filter(tx => {
+                        // 검색어 필터
+                        if (searchTerm && !tx.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+                          return false;
+                        }
+                        return true;
+                      }).map((tx) => (
+                        <tr key={tx.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {getTransactionTypeBadge(tx.transaction_type)}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-900">{tx.description}</td>
+                          <td className={`px-6 py-4 text-right text-sm font-semibold ${
+                            tx.amount > 0 ? 'text-green-600' : 'text-red-600'
+                          }`}>
+                            {tx.amount > 0 ? '+' : ''}{formatAmount(tx.amount)} P
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{formatDate(tx.created_at)}</td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 관리자용 메인 뷰 - 사용자 리스트 */}
+      {isAdmin && !selectedUserDetail && (
+        <div className="space-y-6">
+          {/* 사용자 리스트 테이블 */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <h2 className="text-lg font-semibold text-gray-900">사용자 포인트 현황</h2>
+              <button
+                onClick={() => {
+                  fetchBalances();
+                  fetchBalance();
+                }}
+                className="px-4 py-2 text-sm border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                새로고침
+              </button>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">사용자</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">권한</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">발급</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">사용 가능</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">대기 중</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">사용</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">회수</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">작업</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {loading ? (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-12 text-center">
+                        <Loader2 className="w-6 h-6 animate-spin text-gray-400 mx-auto" />
+                      </td>
+                    </tr>
+                  ) : balances.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                        사용자 데이터가 없습니다.
+                      </td>
+                    </tr>
+                  ) : (
+                    balances.filter(bal => bal.role === 'advertiser').map((bal) => (
+                      <tr
+                        key={bal.user_id}
+                        className="hover:bg-gray-50 cursor-pointer"
+                        onClick={() => {
+                          setSelectedUserDetail(bal.user_id);
+                          setSelectedUserId(bal.user_id.toString());
+                        }}
+                      >
+                        <td className="px-6 py-4">
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{bal.name}</p>
+                            <p className="text-xs text-gray-500">@{bal.username}</p>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {getRoleBadge(bal.role)}
+                        </td>
+                        <td className="px-6 py-4 text-right text-sm font-semibold text-blue-600">
+                          {formatAmount(bal.total_earned)} P
+                        </td>
+                        <td className="px-6 py-4 text-right text-sm font-semibold text-green-600">
+                          {formatAmount(bal.available_points)} P
+                        </td>
+                        <td className="px-6 py-4 text-right text-sm font-semibold text-yellow-600">
+                          {formatAmount(bal.pending_points)} P
+                        </td>
+                        <td className="px-6 py-4 text-right text-sm font-semibold text-indigo-600">
+                          {formatAmount(bal.actual_spent || 0)} P
+                        </td>
+                        <td className="px-6 py-4 text-right text-sm font-semibold text-red-600">
+                          {formatAmount(bal.total_subtracted || 0)} P
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedUserDetail(bal.user_id);
+                              setSelectedUserId(bal.user_id.toString());
+                            }}
+                            className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                          >
+                            상세보기
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 관리자용 상세 뷰 - 선택된 사용자 */}
+      {isAdmin && selectedUserDetail && (
+        <div className="space-y-6">
+          {/* 포인트 조정 버튼 */}
+          <div className="flex justify-end">
+            <button
+              onClick={() => setShowAdjustModal(true)}
+              className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              포인트 조정
+            </button>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+            </div>
+          ) : balance ? (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-gray-600">사용 가능 포인트</h3>
+                    <DollarSign className="w-5 h-5 text-green-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900">{formatAmount(balance.available_points)} P</p>
+                  <p className="text-xs text-gray-500 mt-1">즉시 사용 가능</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-gray-600">대기 중 포인트</h3>
+                    <Calendar className="w-5 h-5 text-yellow-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900">{formatAmount(balance.pending_points)} P</p>
+                  <p className="text-xs text-gray-500 mt-1">검수 대기 중</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-gray-600">총 획득 포인트</h3>
+                    <TrendingUp className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900">{formatAmount(balance.total_earned)} P</p>
+                  <p className="text-xs text-gray-500 mt-1">누적 획득</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-gray-600">총 사용 포인트</h3>
+                    <ArrowDownCircle className="w-5 h-5 text-indigo-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900">{formatAmount(balance.actual_spent || 0)} P</p>
+                  <p className="text-xs text-gray-500 mt-1">승인된 리뷰 포인트</p>
+                </div>
+
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-sm font-medium text-gray-600">총 회수 포인트</h3>
+                    <TrendingDown className="w-5 h-5 text-red-600" />
+                  </div>
+                  <p className="text-3xl font-bold text-gray-900">
+                    {formatAmount(
+                      allTransactions
+                        .filter(tx => tx.transaction_type === 'admin_subtract')
+                        .reduce((sum, tx) => sum + Math.abs(tx.amount), 0)
+                    )} P
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">관리자 회수</p>
+                </div>
+              </div>
+
+              {/* 거래 내역 */}
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">거래 내역</h2>
+                </div>
+
+                {/* 필터 */}
+                <div className="p-4 bg-gray-50 border-b border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">거래 유형</label>
+                      <select
+                        value={transactionTypeFilter}
+                        onChange={(e) => setTransactionTypeFilter(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      >
+                        <option value="all">전체</option>
+                        <option value="spend">사용</option>
+                        <option value="refund">환불</option>
+                        <option value="admin_add">발급</option>
+                        <option value="admin_subtract">회수</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">시작일</label>
+                      <input
+                        type="date"
+                        value={dateRange.start}
+                        onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">종료일</label>
+                      <input
+                        type="date"
+                        value={dateRange.end}
+                        onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">검색</label>
+                      <input
+                        type="text"
+                        placeholder="설명 검색..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-6">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">유형</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">설명</th>
+                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">금액</th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">일시</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200">
+                        {transactions.filter(tx => {
+                          if (searchTerm && !tx.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+                            return false;
+                          }
+                          return true;
+                        }).length === 0 ? (
+                          <tr>
+                            <td colSpan={4} className="px-6 py-8 text-center text-gray-500">
+                              {searchTerm ? '검색 결과가 없습니다.' : '거래 내역이 없습니다.'}
+                            </td>
+                          </tr>
+                        ) : (
+                          transactions.filter(tx => {
+                            if (searchTerm && !tx.description.toLowerCase().includes(searchTerm.toLowerCase())) {
+                              return false;
+                            }
+                            return true;
+                          }).map((tx) => (
+                            <tr key={tx.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                {getTransactionTypeBadge(tx.transaction_type)}
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-900">{tx.description}</td>
+                              <td className={`px-6 py-4 text-right text-sm font-semibold ${
+                                tx.amount > 0 ? 'text-green-600' : 'text-red-600'
+                              }`}>
+                                {tx.amount > 0 ? '+' : ''}{formatAmount(tx.amount)} P
+                              </td>
+                              <td className="px-6 py-4 text-sm text-gray-500">{formatDate(tx.created_at)}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center py-12">
+              <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">포인트 정보가 없습니다</h3>
+              <p className="text-gray-500">포인트 내역을 불러올 수 없습니다.</p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* 포인트 조정 모달 */}
+      {showAdjustModal && isAdmin && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+            <h3 className="text-lg font-semibold mb-4">포인트 조정</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">사용자 선택</label>
+                <select
+                  value={adjustForm.user_id}
+                  onChange={(e) => setAdjustForm(prev => ({ ...prev, user_id: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">사용자를 선택하세요</option>
+                  {balances.filter(bal => bal.role === 'advertiser').map((balance) => (
+                    <option key={balance.user_id} value={balance.user_id}>
+                      {balance.name} (@{balance.username}) - {formatAmount(balance.available_points)} P
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">조정 포인트</label>
+                <input
+                  type="number"
+                  value={adjustForm.amount}
+                  onChange={(e) => setAdjustForm(prev => ({ ...prev, amount: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="양수: 추가, 음수: 차감"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  양수를 입력하면 포인트가 추가되고, 음수를 입력하면 차감됩니다.
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">조정 사유</label>
+                <textarea
+                  value={adjustForm.description}
+                  onChange={(e) => setAdjustForm(prev => ({ ...prev, description: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="포인트 조정 사유를 입력하세요"
+                  rows={3}
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowAdjustModal(false);
+                  setAdjustForm({ user_id: '', amount: '', description: '' });
+                }}
+                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                onClick={adjustPoints}
+                disabled={submitting || !adjustForm.user_id || !adjustForm.amount || !adjustForm.description}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                {submitting ? <Loader2 className="w-4 h-4 animate-spin mx-auto" /> : '조정'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

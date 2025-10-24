@@ -1,0 +1,511 @@
+import { useEffect, useState } from 'react';
+import { Users, Coins, MapPin, CheckCircle, TrendingUp, Calendar, Clock, AlertCircle, FileText, Link as LinkIcon } from 'lucide-react';
+
+// 관리자용 통계 타입
+interface AdminStats {
+  role: 'admin' | 'developer';
+  static: {
+    totalPlaces: number;
+    totalReviews: number;
+    totalBlogs: number;
+    totalTraffic: number;
+    pendingReviews: number;
+  };
+  period: {
+    startDate: string | null;
+    endDate: string | null;
+    workCount: {
+      receipts: number;
+      blogs: number;
+      traffic: number;
+    };
+    spentPoints: {
+      receipts: number;
+      blogs: number;
+      traffic: number;
+    };
+  };
+}
+
+// 사용자용 통계 타입 (기존 유지)
+interface UserStats {
+  role: 'advertiser' | 'distributor';
+  myPlaces: number;
+  subordinates: number;
+  reviews: {
+    pending: number;
+    approved: number;
+    rejected: number;
+    total: number;
+    today: number;
+  };
+  points: {
+    available: number;
+    pending: number;
+    earned: number;
+    spent: number;
+    today: number;
+  };
+}
+
+type DashboardStats = AdminStats | UserStats;
+
+interface Activity {
+  type: string;
+  status?: string;
+  transaction_type?: string;
+  user?: {
+    name: string;
+    username: string;
+  };
+  place?: string;
+  amount?: number;
+  description?: string;
+  role?: string;
+  created_at: string;
+  id: number;
+}
+
+type PeriodType = 'today' | 'yesterday' | 'thisWeek' | 'thisMonth' | 'all';
+
+export function AdminDashboard_V1() {
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [activities, setActivities] = useState<Activity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodType>('all');
+
+  // 기간별 날짜 계산
+  const getDateRange = (period: PeriodType): { startDate: string; endDate: string } | null => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const day = today.getDate();
+
+    switch (period) {
+      case 'today':
+        const todayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        return { startDate: todayStr, endDate: todayStr };
+
+      case 'yesterday':
+        const yesterday = new Date(year, month, day - 1);
+        const yesterdayStr = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}-${String(yesterday.getDate()).padStart(2, '0')}`;
+        return { startDate: yesterdayStr, endDate: yesterdayStr };
+
+      case 'thisWeek':
+        const firstDay = new Date(year, month, day - today.getDay());
+        const lastDay = new Date(year, month, day + (6 - today.getDay()));
+        return {
+          startDate: `${firstDay.getFullYear()}-${String(firstDay.getMonth() + 1).padStart(2, '0')}-${String(firstDay.getDate()).padStart(2, '0')}`,
+          endDate: `${lastDay.getFullYear()}-${String(lastDay.getMonth() + 1).padStart(2, '0')}-${String(lastDay.getDate()).padStart(2, '0')}`
+        };
+
+      case 'thisMonth':
+        const firstDayOfMonth = new Date(year, month, 1);
+        const lastDayOfMonth = new Date(year, month + 1, 0);
+        return {
+          startDate: `${year}-${String(month + 1).padStart(2, '0')}-01`,
+          endDate: `${year}-${String(month + 1).padStart(2, '0')}-${String(lastDayOfMonth.getDate()).padStart(2, '0')}`
+        };
+
+      case 'all':
+      default:
+        return null;
+    }
+  };
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [selectedPeriod]);
+
+  const fetchDashboardData = async () => {
+    try {
+      const authData = localStorage.getItem('adr_auth');
+      const { token } = authData ? JSON.parse(authData) : {};
+
+      // 기간별 쿼리 파라미터 생성
+      const dateRange = getDateRange(selectedPeriod);
+      const queryParams = dateRange
+        ? `?startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`
+        : '';
+
+      // 통계 데이터 가져오기
+      const statsResponse = await fetch(`http://localhost:3001/api/dashboard/stats${queryParams}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const statsData = await statsResponse.json();
+
+      // 최근 활동 가져오기
+      const activitiesResponse = await fetch('http://localhost:3001/api/dashboard/recent-activities?limit=10', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const activitiesData = await activitiesResponse.json();
+
+      if (statsData.success) {
+        setStats(statsData.data);
+      }
+
+      if (activitiesData.success) {
+        setActivities(activitiesData.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading || !stats) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">로딩 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const colorVariants = {
+    blue: { bg: 'bg-gradient-to-br from-blue-50 to-blue-100', text: 'text-blue-700', icon: 'text-blue-600', border: 'border-blue-200' },
+    green: { bg: 'bg-gradient-to-br from-green-50 to-green-100', text: 'text-green-700', icon: 'text-green-600', border: 'border-green-200' },
+    yellow: { bg: 'bg-gradient-to-br from-yellow-50 to-yellow-100', text: 'text-yellow-700', icon: 'text-yellow-600', border: 'border-yellow-200' },
+    purple: { bg: 'bg-gradient-to-br from-purple-50 to-purple-100', text: 'text-purple-700', icon: 'text-purple-600', border: 'border-purple-200' },
+    orange: { bg: 'bg-gradient-to-br from-orange-50 to-orange-100', text: 'text-orange-700', icon: 'text-orange-600', border: 'border-orange-200' },
+    pink: { bg: 'bg-gradient-to-br from-pink-50 to-pink-100', text: 'text-pink-700', icon: 'text-pink-600', border: 'border-pink-200' },
+    indigo: { bg: 'bg-gradient-to-br from-indigo-50 to-indigo-100', text: 'text-indigo-700', icon: 'text-indigo-600', border: 'border-indigo-200' }
+  };
+
+  // 관리자용 통계 카드
+  if (stats.role === 'admin' || stats.role === 'developer') {
+    const adminStats = stats as AdminStats;
+
+    return (
+      <div>
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">대시보드</h1>
+          <p className="text-gray-600 mt-1">전체 현황을 한눈에 확인하세요</p>
+        </div>
+
+        {/* 기간 선택 버튼 */}
+        <div className="flex gap-2 mb-6">
+          {[
+            { key: 'today', label: '오늘' },
+            { key: 'yesterday', label: '어제' },
+            { key: 'thisWeek', label: '이번 주' },
+            { key: 'thisMonth', label: '이번 달' },
+            { key: 'all', label: '전체' }
+          ].map(({ key, label }) => (
+            <button
+              key={key}
+              onClick={() => setSelectedPeriod(key as PeriodType)}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                selectedPeriod === key
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {/* 정적 통계 (4개) */}
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">전체 통계</h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+            <StatCard
+              title="전체 플레이스"
+              value={adminStats.static.totalPlaces.toLocaleString()}
+              subtitle="등록된 장소"
+              icon={MapPin}
+              color="green"
+              colorVariants={colorVariants}
+            />
+            <StatCard
+              title="총 리뷰"
+              value={adminStats.static.totalReviews.toLocaleString()}
+              subtitle="영수증 리뷰"
+              icon={FileText}
+              color="blue"
+              colorVariants={colorVariants}
+            />
+            <StatCard
+              title="총 블로그"
+              value={adminStats.static.totalBlogs.toLocaleString()}
+              subtitle={adminStats.static.totalBlogs === 0 ? '미구현' : '블로그'}
+              icon={FileText}
+              color="orange"
+              colorVariants={colorVariants}
+            />
+            <StatCard
+              title="총 트래픽"
+              value={adminStats.static.totalTraffic.toLocaleString()}
+              subtitle={adminStats.static.totalTraffic === 0 ? '미구현' : '트래픽'}
+              icon={LinkIcon}
+              color="indigo"
+              colorVariants={colorVariants}
+            />
+          </div>
+        </div>
+
+        {/* 작업 현황 (3개) */}
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">
+            총 작업 현황
+            {adminStats.period.startDate && adminStats.period.endDate && (
+              <span className="ml-2 text-xs font-normal text-gray-500">
+                ({adminStats.period.startDate} ~ {adminStats.period.endDate})
+              </span>
+            )}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+            <StatCard
+              title="영수증"
+              value={`${adminStats.period.workCount.receipts.toLocaleString()}건`}
+              subtitle="작업 건수"
+              icon={FileText}
+              color="blue"
+              colorVariants={colorVariants}
+            />
+            <StatCard
+              title="블로그"
+              value={`${adminStats.period.workCount.blogs.toLocaleString()}건`}
+              subtitle={adminStats.period.workCount.blogs === 0 ? '미구현' : '작업 건수'}
+              icon={FileText}
+              color="orange"
+              colorVariants={colorVariants}
+            />
+            <StatCard
+              title="트래픽"
+              value={`${adminStats.period.workCount.traffic.toLocaleString()}건`}
+              subtitle={adminStats.period.workCount.traffic === 0 ? '미구현' : '작업 건수'}
+              icon={LinkIcon}
+              color="indigo"
+              colorVariants={colorVariants}
+            />
+          </div>
+        </div>
+
+        {/* 사용된 포인트 (3개) */}
+        <div className="mb-8">
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">
+            사용된 포인트
+            {adminStats.period.startDate && adminStats.period.endDate && (
+              <span className="ml-2 text-xs font-normal text-gray-500">
+                ({adminStats.period.startDate} ~ {adminStats.period.endDate})
+              </span>
+            )}
+          </h3>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+            <StatCard
+              title="영수증"
+              value={`${adminStats.period.spentPoints.receipts.toLocaleString()}P`}
+              subtitle="리뷰 포인트"
+              icon={Coins}
+              color="yellow"
+              colorVariants={colorVariants}
+            />
+            <StatCard
+              title="블로그"
+              value={`${adminStats.period.spentPoints.blogs.toLocaleString()}P`}
+              subtitle={adminStats.period.spentPoints.blogs === 0 ? '미구현' : '블로그 포인트'}
+              icon={Coins}
+              color="pink"
+              colorVariants={colorVariants}
+            />
+            <StatCard
+              title="트래픽"
+              value={`${adminStats.period.spentPoints.traffic.toLocaleString()}P`}
+              subtitle={adminStats.period.spentPoints.traffic === 0 ? '미구현' : '트래픽 포인트'}
+              icon={Coins}
+              color="purple"
+              colorVariants={colorVariants}
+            />
+          </div>
+        </div>
+
+        {/* 최근 활동 */}
+        <RecentActivities activities={activities} />
+      </div>
+    );
+  }
+
+  // 일반 사용자용 (기존 유지)
+  const userStats = stats as UserStats;
+  const statCards = [
+    {
+      title: '내 플레이스',
+      value: userStats.myPlaces.toLocaleString(),
+      icon: MapPin,
+      subtitle: '등록한 장소',
+      color: 'green'
+    },
+    ...(stats.role === 'distributor' ? [{
+      title: '하위 사용자',
+      value: userStats.subordinates.toLocaleString(),
+      icon: Users,
+      subtitle: '관리 중인 광고주',
+      color: 'blue'
+    }] : []),
+    {
+      title: '내 리뷰',
+      value: userStats.reviews.total.toLocaleString(),
+      icon: CheckCircle,
+      subtitle: `승인 ${userStats.reviews.approved}건 · 대기 ${userStats.reviews.pending}건`,
+      color: 'yellow'
+    },
+    {
+      title: '내 포인트',
+      value: `${userStats.points.available.toLocaleString()}P`,
+      icon: Coins,
+      subtitle: `오늘 ${userStats.points.today.toLocaleString()}P 획득`,
+      color: 'purple'
+    }
+  ];
+
+  return (
+    <div>
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-gray-900">대시보드</h1>
+        <p className="text-gray-600 mt-1">전체 현황을 한눈에 확인하세요</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        {statCards.map((stat, index) => (
+          <StatCard
+            key={index}
+            title={stat.title}
+            value={stat.value}
+            subtitle={stat.subtitle}
+            icon={stat.icon}
+            color={stat.color as keyof typeof colorVariants}
+            colorVariants={colorVariants}
+          />
+        ))}
+      </div>
+
+      <RecentActivities activities={activities} />
+    </div>
+  );
+}
+
+// 통계 카드 컴포넌트
+interface StatCardProps {
+  title: string;
+  value: string;
+  subtitle: string;
+  icon: any;
+  color: keyof typeof colorVariants;
+  colorVariants: any;
+}
+
+function StatCard({ title, value, subtitle, icon: Icon, color, colorVariants }: StatCardProps) {
+  const variant = colorVariants[color];
+
+  return (
+    <div className={`bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow border-l-4 ${variant.border} p-6`}>
+      <div className="flex items-center justify-between mb-4">
+        <div className={`${variant.bg} p-3 rounded-xl shadow-sm`}>
+          <Icon className={`w-6 h-6 ${variant.icon}`} />
+        </div>
+      </div>
+      <div>
+        <p className={`text-sm font-semibold mb-1 ${variant.text}`}>{title}</p>
+        <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
+        <p className="text-xs text-gray-500">{subtitle}</p>
+      </div>
+    </div>
+  );
+}
+
+// 최근 활동 컴포넌트
+function RecentActivities({ activities }: { activities: Activity[] }) {
+  return (
+    <div className="bg-white rounded-lg shadow">
+      <div className="px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-gray-900">최근 활동</h2>
+          <Calendar className="w-5 h-5 text-gray-400" />
+        </div>
+      </div>
+      <div className="p-6">
+        {activities.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            최근 활동이 없습니다
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {activities.map((activity) => {
+              const getActivityDisplay = () => {
+                if (activity.type === 'review') {
+                  const statusColors = {
+                    pending: 'bg-yellow-500',
+                    approved: 'bg-green-500',
+                    rejected: 'bg-red-500',
+                    cancelled: 'bg-gray-500'
+                  };
+                  const statusLabels = {
+                    pending: '대기',
+                    approved: '승인',
+                    rejected: '거절',
+                    cancelled: '취소'
+                  };
+                  const title = activity.user
+                    ? `${activity.user.name}님이 리뷰 등록`
+                    : '리뷰 등록';
+                  return {
+                    color: statusColors[activity.status as keyof typeof statusColors] || 'bg-gray-500',
+                    title,
+                    subtitle: `${activity.place} · ${activity.amount?.toLocaleString()}P · ${statusLabels[activity.status as keyof typeof statusLabels]}`
+                  };
+                } else if (activity.type === 'point') {
+                  const typeLabels = {
+                    admin_add: '포인트 지급',
+                    earn: '포인트 획득',
+                    spend: '포인트 사용',
+                    referral: '추천 보상'
+                  };
+                  const title = activity.user
+                    ? `${activity.user.name}님 ${typeLabels[activity.transaction_type as keyof typeof typeLabels] || '포인트 거래'}`
+                    : typeLabels[activity.transaction_type as keyof typeof typeLabels] || '포인트 거래';
+                  return {
+                    color: activity.amount && activity.amount > 0 ? 'bg-blue-500' : 'bg-orange-500',
+                    title,
+                    subtitle: `${activity.amount && activity.amount > 0 ? '+' : ''}${activity.amount?.toLocaleString()}P${activity.description ? ` · ${activity.description}` : ''}`
+                  };
+                } else if (activity.type === 'user') {
+                  const roleLabels = {
+                    advertiser: '광고주',
+                    distributor: '총판'
+                  };
+                  return {
+                    color: 'bg-purple-500',
+                    title: `${activity.user?.name}님 가입`,
+                    subtitle: `${roleLabels[activity.role as keyof typeof roleLabels] || activity.role} 계정`
+                  };
+                }
+                return { color: 'bg-gray-500', title: '알 수 없는 활동', subtitle: '' };
+              };
+
+              const display = getActivityDisplay();
+              const timeAgo = new Date(activity.created_at).toLocaleString('ko-KR');
+
+              return (
+                <div key={`${activity.type}-${activity.id}`} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-2 h-2 ${display.color} rounded-full`}></div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{display.title}</p>
+                      <p className="text-xs text-gray-500">{display.subtitle}</p>
+                    </div>
+                  </div>
+                  <span className="text-xs text-gray-400">{timeAgo}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
