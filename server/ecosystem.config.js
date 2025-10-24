@@ -15,7 +15,7 @@ module.exports = {
       DB_PORT: 5432,
       DB_NAME: 'place_up',
       DB_USER: 'pup_user',
-      DB_PASSWORD: 'Tech1324!pup',
+      DB_PASSWORD: 'Tech1324!db',
 
       // JWT 설정
       JWT_SECRET: 'place-up-production-secret-key-2025',
