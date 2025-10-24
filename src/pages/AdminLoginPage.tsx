@@ -51,7 +51,7 @@ export function AdminLoginPage() {
               </div>
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">ADR 관리자</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Place-UP 관리자</h1>
           <p className="text-gray-600 mt-2">관리자 계정으로 로그인하세요</p>
         </div>
 

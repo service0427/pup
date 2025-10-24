@@ -171,7 +171,7 @@ export function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalPro
                     <h3 className="font-bold mb-2">제1장 총칙</h3>
                     <p className="mb-2">
                       <strong>제1조 (목적)</strong><br />
-                      본 약관은 서비스 이용자가 ADR 시스템(이하 "회사"라 합니다)가 제공하는 온라인상의 인터넷 서비스를
+                      본 약관은 서비스 이용자가 Place-UP 시스템(이하 "회사"라 합니다)가 제공하는 온라인상의 인터넷 서비스를
                       이용함에 있어 회사와 회원의 권리 의무 및 책임사항을 규정함을 목적으로 합니다.
                     </p>
                     <p className="mb-2">
@@ -206,10 +206,10 @@ export function SignupModal({ isOpen, onClose, onSwitchToLogin }: SignupModalPro
                 </button>
                 {showPrivacy && (
                   <div className="px-4 py-3 border-t max-h-40 overflow-y-auto text-sm text-gray-600">
-                    <h3 className="font-bold mb-2 text-center">ADR 개인정보처리방침</h3>
+                    <h3 className="font-bold mb-2 text-center">Place-UP 개인정보처리방침</h3>
                     <p className="text-right text-xs mb-3">ver.2025.01.01</p>
                     <p className="mb-2">
-                      ADR 시스템(이하 '회사')는 회원님의 개인정보를 중요시하며, 개인정보의 보호와 관련하여
+                      Place-UP 시스템(이하 '회사')는 회원님의 개인정보를 중요시하며, 개인정보의 보호와 관련하여
                       「정보통신망 이용촉진 및 정보보호 등에 관한 법률」 등 관련법 상의 개인정보 보호 규정을 준수하고 있습니다.
                     </p>
                     <p className="mb-2">

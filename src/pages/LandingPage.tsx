@@ -52,8 +52,8 @@ export function LandingPage() {
                   </div>
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">ADR</h1>
-                  <p className="text-xs text-gray-500">광고 리뷰 관리 시스템</p>
+                  <h1 className="text-xl font-bold text-gray-900">Place-UP</h1>
+                  <p className="text-xs text-gray-500">플레이스 광고 시스템</p>
                 </div>
               </Link>
             </div>
@@ -108,7 +108,7 @@ export function LandingPage() {
           <div className="text-center py-12 lg:py-20">
             <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 mb-6">
               Easy Management!<br />
-              <span className="text-blue-600">ADR 시스템</span>으로 스마트한 샵 관리
+              <span className="text-blue-600">Place-UP 시스템</span>으로 스마트한 샵 관리
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
               영수증 관리부터 리뷰 모니터링까지!
@@ -182,7 +182,7 @@ export function LandingPage() {
                 <div className="text-4xl font-bold text-blue-600 mb-4">01</div>
                 <h3 className="text-xl font-semibold mb-3">로그인</h3>
                 <p className="text-gray-600 mb-4">
-                  계정 정보로 ADR 시스템에 접속하세요.
+                  계정 정보로 Place-UP 시스템에 접속하세요.
                 </p>
                 <Link to="/admin/login" className="text-blue-600 font-medium hover:text-blue-700 inline-flex items-center">
                   로그인하기 <ArrowRight className="w-4 h-4 ml-1" />
@@ -249,7 +249,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              ADR 시스템의 핵심 기능
+              Place-UP 시스템의 핵심 기능
             </h2>
             <p className="text-lg text-gray-600">
               효율적인 리뷰 관리를 위한 모든 것
@@ -345,7 +345,7 @@ export function LandingPage() {
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-white font-semibold mb-4">ADR 시스템</h3>
+              <h3 className="text-white font-semibold mb-4">Place-UP 시스템</h3>
               <p className="text-sm">
                 광고 리뷰 관리의 새로운 기준
               </p>
@@ -375,7 +375,7 @@ export function LandingPage() {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t border-gray-800 text-center text-sm">
-            <p>&copy; 2024 ADR System. All rights reserved.</p>
+            <p>&copy; 2024 Place-UP System. All rights reserved.</p>
           </div>
         </div>
       </footer>

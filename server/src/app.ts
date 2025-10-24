@@ -54,7 +54,7 @@ app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
-    message: 'ADR API Server is running',
+    message: 'Place-UP API Server is running',
     timestamp: new Date().toISOString()
   });
 });
@@ -80,7 +80,7 @@ app.use((req: express.Request, res: express.Response) => {
 // Start server
 app.listen(PORT, () => {
   console.log('=================================');
-  console.log(`🚀 ADR API Server is running`);
+  console.log(`🚀 Place-UP API Server is running`);
   console.log(`📡 Port: ${PORT}`);
   console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 URL: http://localhost:${PORT}`);

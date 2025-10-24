@@ -127,7 +127,7 @@ export function MainLayout() {
                 <span className="text-blue-600 text-lg">●</span>
               </div>
             </div>
-            <h1 className="ml-3 text-xl font-bold text-gray-900">NBADM</h1>
+            <h1 className="ml-3 text-xl font-bold text-gray-900">Place-UP</h1>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
