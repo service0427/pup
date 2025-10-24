@@ -28,7 +28,7 @@ export function ReviewEditModal({ isOpen, onClose, onSuccess, reviewId }: Review
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${reviewId}`, {
+      const response = await fetch(`/api/receipts/${reviewId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -56,7 +56,7 @@ export function ReviewEditModal({ isOpen, onClose, onSuccess, reviewId }: Review
       const formDataUpload = new FormData();
       formDataUpload.append('image', file);
 
-      const response = await fetch('http://localhost:3001/api/receipts/upload-image', {
+      const response = await fetch('/api/receipts/upload-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -97,7 +97,7 @@ export function ReviewEditModal({ isOpen, onClose, onSuccess, reviewId }: Review
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${reviewId}`, {
+      const response = await fetch(`/api/receipts/${reviewId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -182,10 +182,10 @@ export function ReviewEditModal({ isOpen, onClose, onSuccess, reviewId }: Review
                   {formData.images.map((img, idx) => (
                     <div key={idx} className="relative group">
                       <img
-                        src={`http://localhost:3001${img}`}
+                        src={`${img}`}
                         alt="preview"
                         className="w-20 h-20 object-cover rounded-lg cursor-pointer border border-gray-200"
-                        onClick={() => window.open(`http://localhost:3001${img}`, '_blank')}
+                        onClick={() => window.open(`${img}`, '_blank')}
                       />
                       <button
                         onClick={() => handleRemoveImage(idx)}

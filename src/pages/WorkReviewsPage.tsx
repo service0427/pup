@@ -72,7 +72,7 @@ export function WorkReviewsPage() {
   const fetchPendingWorks = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3001/api/work-reviews/pending', {
+      const response = await fetch('/api/work-reviews/pending', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adr_token')}`
         }
@@ -97,7 +97,7 @@ export function WorkReviewsPage() {
         params.append('status', statusFilter);
       }
 
-      const response = await fetch(`http://localhost:3001/api/work-reviews/completed?${params}`, {
+      const response = await fetch(`/api/work-reviews/completed?${params}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adr_token')}`
         }
@@ -119,7 +119,7 @@ export function WorkReviewsPage() {
 
     try {
       setSubmitting(true);
-      const response = await fetch(`http://localhost:3001/api/work-reviews/${selectedWork.work_history_id}/review`, {
+      const response = await fetch(`/api/work-reviews/${selectedWork.work_history_id}/review`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

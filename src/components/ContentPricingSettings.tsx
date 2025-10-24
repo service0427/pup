@@ -23,7 +23,7 @@ export function ContentPricingSettings() {
   const fetchPricing = async () => {
     try {
       setLoading(true);
-      const response = await fetch('http://localhost:3001/api/content-pricing');
+      const response = await fetch('/api/content-pricing');
       const data = await response.json();
 
       if (data.success) {
@@ -55,7 +55,7 @@ export function ContentPricingSettings() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/content-pricing/${id}`, {
+      const response = await fetch(`/api/content-pricing/${id}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

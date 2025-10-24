@@ -72,7 +72,7 @@ export function PointRequestsPage() {
         params.append('status', statusFilter);
       }
 
-      const response = await fetch(`http://localhost:3001/api/point-requests?${params}`, {
+      const response = await fetch(`/api/point-requests?${params}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adr_token')}`
         }
@@ -91,7 +91,7 @@ export function PointRequestsPage() {
 
   const fetchUserBalance = async () => {
     try {
-      const response = await fetch(`http://localhost:3001/api/users/${user?.id}/balance`, {
+      const response = await fetch(`/api/users/${user?.id}/balance`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('adr_token')}`
         }
@@ -109,7 +109,7 @@ export function PointRequestsPage() {
   const createRequest = async () => {
     try {
       setSubmitting(true);
-      const response = await fetch('http://localhost:3001/api/point-requests', {
+      const response = await fetch('/api/point-requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -143,7 +143,7 @@ export function PointRequestsPage() {
 
     try {
       setSubmitting(true);
-      const response = await fetch(`http://localhost:3001/api/point-requests/${selectedRequest.id}/review`, {
+      const response = await fetch(`/api/point-requests/${selectedRequest.id}/review`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

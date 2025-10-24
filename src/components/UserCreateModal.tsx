@@ -54,7 +54,7 @@ export function UserCreateModal({ isOpen, onClose, onSuccess }: UserCreateModalP
         parent_id: formData.parent_id || null
       };
 
-      const response = await fetch('http://localhost:3001/api/users', {
+      const response = await fetch('/api/users', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -32,7 +32,7 @@ export function PlaceEditModal({ isOpen, onClose, onSuccess, placeId }: PlaceEdi
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/places/${placeId}`, {
+      const response = await fetch(`/api/places/${placeId}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -65,7 +65,7 @@ export function PlaceEditModal({ isOpen, onClose, onSuccess, placeId }: PlaceEdi
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/places/${placeId}`, {
+      const response = await fetch(`/api/places/${placeId}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

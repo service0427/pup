@@ -132,13 +132,13 @@ export function AdminDashboardPage() {
         : '';
 
       // 통계 데이터 가져오기
-      const statsResponse = await fetch(`http://localhost:3001/api/dashboard/stats${queryParams}`, {
+      const statsResponse = await fetch(`/api/dashboard/stats${queryParams}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const statsData = await statsResponse.json();
 
       // 최근 활동 가져오기
-      const activitiesResponse = await fetch('http://localhost:3001/api/dashboard/recent-activities?limit=10', {
+      const activitiesResponse = await fetch('/api/dashboard/recent-activities?limit=10', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const activitiesData = await activitiesResponse.json();

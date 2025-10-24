@@ -50,7 +50,7 @@ export function ReviewManagementPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/receipts/admin/all', {
+      const response = await fetch('/api/receipts/admin/all', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -71,11 +71,11 @@ export function ReviewManagementPage() {
 
       let endpoint = '';
       if (activeTab === 'all') {
-        endpoint = 'http://localhost:3001/api/receipts/admin/all';
+        endpoint = '/api/receipts/admin/all';
       } else if (activeTab === 'pending') {
-        endpoint = 'http://localhost:3001/api/receipts/admin/pending';
+        endpoint = '/api/receipts/admin/pending';
       } else if (activeTab === 'delete') {
-        endpoint = 'http://localhost:3001/api/receipts/admin/delete-requests';
+        endpoint = '/api/receipts/admin/delete-requests';
       }
 
       const response = await fetch(endpoint, {
@@ -101,7 +101,7 @@ export function ReviewManagementPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${id}/approve`, {
+      const response = await fetch(`/api/receipts/${id}/approve`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -141,7 +141,7 @@ export function ReviewManagementPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${id}/reject`, {
+      const response = await fetch(`/api/receipts/${id}/reject`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -182,7 +182,7 @@ export function ReviewManagementPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${id}/approve-delete`, {
+      const response = await fetch(`/api/receipts/${id}/approve-delete`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -222,7 +222,7 @@ export function ReviewManagementPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${id}/reject-delete`, {
+      const response = await fetch(`/api/receipts/${id}/reject-delete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -280,7 +280,7 @@ export function ReviewManagementPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${id}/update-review-status`, {
+      const response = await fetch(`/api/receipts/${id}/update-review-status`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -340,7 +340,7 @@ export function ReviewManagementPage() {
 
       for (const id of selectedIds) {
         try {
-          const response = await fetch(`http://localhost:3001/api/receipts/${id}/approve`, {
+          const response = await fetch(`/api/receipts/${id}/approve`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -386,7 +386,7 @@ export function ReviewManagementPage() {
 
       for (const id of selectedIds) {
         try {
-          const response = await fetch(`http://localhost:3001/api/receipts/${id}/approve-delete`, {
+          const response = await fetch(`/api/receipts/${id}/approve-delete`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
           });
@@ -846,10 +846,10 @@ export function ReviewManagementPage() {
                       {selectedReview.images.map((img, idx) => (
                         <img
                           key={idx}
-                          src={`http://localhost:3001${img}`}
+                          src={`${img}`}
                           alt={`리뷰 이미지 ${idx + 1}`}
                           className="w-full h-32 object-cover rounded-lg cursor-pointer hover:opacity-75 transition-opacity"
-                          onClick={() => window.open(`http://localhost:3001${img}`, '_blank')}
+                          onClick={() => window.open(`${img}`, '_blank')}
                         />
                       ))}
                     </div>

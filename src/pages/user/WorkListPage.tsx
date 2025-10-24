@@ -47,7 +47,7 @@ export function WorkListPage() {
         params.append('type', selectedType);
       }
 
-      const response = await fetch(`http://localhost:3001/api/works/available?${params}`, {
+      const response = await fetch(`/api/works/available?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -116,7 +116,7 @@ export function WorkListPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/works/${workId}/claim`, {
+      const response = await fetch(`/api/works/${workId}/claim`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

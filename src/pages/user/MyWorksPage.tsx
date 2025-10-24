@@ -58,7 +58,7 @@ export function MyWorksPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/works/my', {
+      const response = await fetch('/api/works/my', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -141,7 +141,7 @@ export function MyWorksPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/works/${currentWork.id}/abandon`, {
+      const response = await fetch(`/api/works/${currentWork.id}/abandon`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

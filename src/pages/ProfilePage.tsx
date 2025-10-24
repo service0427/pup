@@ -45,7 +45,7 @@ export function ProfilePage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/profile/update-name', {
+      const response = await fetch('/api/profile/update-name', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ export function ProfilePage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/profile/update-password', {
+      const response = await fetch('/api/profile/update-password', {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

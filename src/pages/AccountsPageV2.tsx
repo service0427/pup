@@ -96,7 +96,7 @@ export function AccountsPageV2() {
         //params.append('parent_id', 'null'); // 최상위만
       }
 
-      const response = await fetch(`http://localhost:3001/api/users?${params}`, {
+      const response = await fetch(`/api/users?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -136,7 +136,7 @@ export function AccountsPageV2() {
       params.append('page', subPage.toString());
       params.append('limit', SUBORDINATES_PER_PAGE.toString());
 
-      const response = await fetch(`http://localhost:3001/api/users?${params}`, {
+      const response = await fetch(`/api/users?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -235,7 +235,7 @@ export function AccountsPageV2() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/auth/switch-user', {
+      const response = await fetch('/api/auth/switch-user', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -283,7 +283,7 @@ export function AccountsPageV2() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/users/${targetUser.id}`, {
+      const response = await fetch(`/api/users/${targetUser.id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

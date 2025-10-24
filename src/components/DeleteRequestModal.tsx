@@ -36,7 +36,7 @@ export function DeleteRequestModal({
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${reviewId}/request-delete`, {
+      const response = await fetch(`/api/receipts/${reviewId}/request-delete`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

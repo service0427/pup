@@ -113,7 +113,7 @@ export function PlaceDetailPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/places/${id}`, {
+      const response = await fetch(`/api/places/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -135,7 +135,7 @@ export function PlaceDetailPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/places', {
+      const response = await fetch('/api/places', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -161,7 +161,7 @@ export function PlaceDetailPage() {
       const { token } = authData ? JSON.parse(authData) : {};
 
       // 잔액 조회
-      const balanceResponse = await fetch('http://localhost:3001/api/points/balance', {
+      const balanceResponse = await fetch('/api/points/balance', {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -176,7 +176,7 @@ export function PlaceDetailPage() {
       const txParams = new URLSearchParams();
       txParams.append('limit', '1000');
 
-      const txResponse = await fetch(`http://localhost:3001/api/points/transactions?${txParams}`, {
+      const txResponse = await fetch(`/api/points/transactions?${txParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -196,7 +196,7 @@ export function PlaceDetailPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/place/${id}`, {
+      const response = await fetch(`/api/receipts/place/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -218,7 +218,7 @@ export function PlaceDetailPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${reviewId}`, {
+      const response = await fetch(`/api/receipts/${reviewId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -242,7 +242,7 @@ export function PlaceDetailPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${reviewId}/cancel`, {
+      const response = await fetch(`/api/receipts/${reviewId}/cancel`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -270,7 +270,7 @@ export function PlaceDetailPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${reviewId}/resubmit`, {
+      const response = await fetch(`/api/receipts/${reviewId}/resubmit`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -992,10 +992,10 @@ export function PlaceDetailPage() {
                             {review.images.slice(0, 6).map((img, idx) => (
                               <div key={idx} className="relative">
                                 <img
-                                  src={`http://localhost:3001${img}`}
+                                  src={`${img}`}
                                   alt="review"
                                   className="w-24 h-24 object-cover rounded-lg cursor-pointer hover:opacity-75 border border-gray-200"
-                                  onClick={() => window.open(`http://localhost:3001${img}`, '_blank')}
+                                  onClick={() => window.open(`${img}`, '_blank')}
                                 />
                                 {idx === 5 && review.images.length > 6 && (
                                   <div className="absolute inset-0 bg-black/50 rounded-lg flex items-center justify-center text-white text-sm font-semibold">

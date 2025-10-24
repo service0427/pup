@@ -44,7 +44,7 @@ export function useAuth() {
         };
       } else {
         // 일반 로그인
-        const response = await fetch('http://localhost:3001/api/auth/login', {
+        const response = await fetch('/api/auth/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -90,7 +90,7 @@ export function useAuth() {
       if (authData) {
         const { sessionId } = JSON.parse(authData);
 
-        await fetch('http://localhost:3001/api/auth/logout', {
+        await fetch('/api/auth/logout', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -47,7 +47,7 @@ export function PlacesPage() {
       const params = new URLSearchParams();
       if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`http://localhost:3001/api/places?${params}`, {
+      const response = await fetch(`/api/places?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -86,7 +86,7 @@ export function PlacesPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/places/${id}`, {
+      const response = await fetch(`/api/places/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`

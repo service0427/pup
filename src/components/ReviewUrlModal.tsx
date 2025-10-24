@@ -48,7 +48,7 @@ export function ReviewUrlModal({ isOpen, onClose, onSuccess, reviewId, currentUr
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${reviewId}/url`, {
+      const response = await fetch(`/api/receipts/${reviewId}/url`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

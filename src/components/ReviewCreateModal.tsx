@@ -36,7 +36,7 @@ export function ReviewCreateModal({ isOpen, onClose, onSuccess, placeId }: Revie
       const { token } = authData ? JSON.parse(authData) : {};
 
       // 리뷰 단가 조회
-      const priceResponse = await fetch('http://localhost:3001/api/content-pricing', {
+      const priceResponse = await fetch('/api/content-pricing', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const priceData = await priceResponse.json();
@@ -48,7 +48,7 @@ export function ReviewCreateModal({ isOpen, onClose, onSuccess, placeId }: Revie
       }
 
       // 포인트 잔액 조회
-      const balanceResponse = await fetch('http://localhost:3001/api/points/balance', {
+      const balanceResponse = await fetch('/api/points/balance', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const balanceData = await balanceResponse.json();
@@ -84,7 +84,7 @@ export function ReviewCreateModal({ isOpen, onClose, onSuccess, placeId }: Revie
       const formData = new FormData();
       formData.append('image', file);
 
-      const response = await fetch('http://localhost:3001/api/receipts/upload-image', {
+      const response = await fetch('/api/receipts/upload-image', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -140,7 +140,7 @@ export function ReviewCreateModal({ isOpen, onClose, onSuccess, placeId }: Revie
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/place/${placeId}`, {
+      const response = await fetch(`/api/receipts/place/${placeId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -228,10 +228,10 @@ export function ReviewCreateModal({ isOpen, onClose, onSuccess, placeId }: Revie
                         {form.images.map((img, imgIndex) => (
                           <div key={imgIndex} className="relative group">
                             <img
-                              src={`http://localhost:3001${img}`}
+                              src={`${img}`}
                               alt="preview"
                               className="w-10 h-10 object-cover rounded cursor-pointer"
-                              onClick={() => window.open(`http://localhost:3001${img}`, '_blank')}
+                              onClick={() => window.open(`${img}`, '_blank')}
                             />
                             <button
                               onClick={() => handleRemoveImage(index, imgIndex)}

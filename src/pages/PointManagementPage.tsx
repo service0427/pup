@@ -79,7 +79,7 @@ function PointAdjustModal({ isOpen, onClose, onSuccess, user }: PointAdjustModal
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/points/adjust', {
+      const response = await fetch('/api/points/adjust', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -267,7 +267,7 @@ function TransactionHistoryModal({ isOpen, onClose, user }: TransactionHistoryMo
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/points/transactions?user_id=${user!.user_id}&limit=50`, {
+      const response = await fetch(`/api/points/transactions?user_id=${user!.user_id}&limit=50`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -426,7 +426,7 @@ export function PointManagementPage() {
       const params = new URLSearchParams();
       if (roleFilter) params.append('role', roleFilter);
 
-      const response = await fetch(`http://localhost:3001/api/points/balances?${params}`, {
+      const response = await fetch(`/api/points/balances?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

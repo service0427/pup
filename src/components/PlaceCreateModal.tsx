@@ -28,7 +28,7 @@ export function PlaceCreateModal({ isOpen, onClose, onSuccess }: PlaceCreateModa
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/places', {
+      const response = await fetch('/api/places', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

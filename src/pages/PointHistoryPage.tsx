@@ -137,7 +137,7 @@ export function PointHistoryPage() {
       }
 
       // 잔액 정보 조회
-      const balanceResponse = await fetch(`http://localhost:3001/api/points/balance?${params}`, {
+      const balanceResponse = await fetch(`/api/points/balance?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -155,7 +155,7 @@ export function PointHistoryPage() {
       }
       txParams.append('limit', '1000'); // 전체 조회
 
-      const txResponse = await fetch(`http://localhost:3001/api/points/transactions?${txParams}`, {
+      const txResponse = await fetch(`/api/points/transactions?${txParams}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -192,7 +192,7 @@ export function PointHistoryPage() {
         params.append('end_date', dateRange.end);
       }
 
-      const response = await fetch(`http://localhost:3001/api/points/transactions?${params}`, {
+      const response = await fetch(`/api/points/transactions?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -220,7 +220,7 @@ export function PointHistoryPage() {
         params.append('search', searchTerm);
       }
 
-      const response = await fetch(`http://localhost:3001/api/points/balances?${params}`, {
+      const response = await fetch(`/api/points/balances?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -243,7 +243,7 @@ export function PointHistoryPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/points/adjust', {
+      const response = await fetch('/api/points/adjust', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

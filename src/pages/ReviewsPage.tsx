@@ -62,7 +62,7 @@ export function ReviewsPage() {
         params.append('search', searchTerm);
       }
 
-      const response = await fetch(`http://localhost:3001/api/reviews?${params}`, {
+      const response = await fetch(`/api/reviews?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -110,7 +110,7 @@ export function ReviewsPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/reviews/${reviewId}/delete-request`, {
+      const response = await fetch(`/api/reviews/${reviewId}/delete-request`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -154,7 +154,7 @@ export function ReviewsPage() {
       format: 'excel'
     });
 
-    window.open(`http://localhost:3001/api/reviews/export?${params}&token=${token}`, '_blank');
+    window.open(`/api/reviews/export?${params}&token=${token}`, '_blank');
   };
 
   const handleDateClick = (date: string) => {

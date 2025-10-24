@@ -103,7 +103,7 @@ export function ReceiptsPage() {
       if (searchTerm) params.append('search', searchTerm);
       if (activeTab !== 'all') params.append('status', activeTab);
 
-      const response = await fetch(`http://localhost:3001/api/receipts?${params}`, {
+      const response = await fetch(`/api/receipts?${params}`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -142,7 +142,7 @@ export function ReceiptsPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${id}`, {
+      const response = await fetch(`/api/receipts/${id}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
@@ -170,7 +170,7 @@ export function ReceiptsPage() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${updatedReceipt.id}`, {
+      const response = await fetch(`/api/receipts/${updatedReceipt.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -205,7 +205,7 @@ export function ReceiptsPage() {
         status: 'pending'
       };
 
-      const response = await fetch('http://localhost:3001/api/receipts', {
+      const response = await fetch('/api/receipts', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -232,7 +232,7 @@ export function ReceiptsPage() {
       const newStatus = receipt.status === 'active' ? 'inactive' : 'active';
       const statusText = newStatus === 'active' ? '재개' : '일시정지';
 
-      const response = await fetch(`http://localhost:3001/api/receipts/${receipt.id}`, {
+      const response = await fetch(`/api/receipts/${receipt.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -36,7 +36,7 @@ export function MainLayout() {
       const authData = localStorage.getItem('adr_auth');
       const { token } = authData ? JSON.parse(authData) : {};
 
-      const response = await fetch('http://localhost:3001/api/points/balance', {
+      const response = await fetch('/api/points/balance', {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
@@ -250,7 +250,7 @@ export function MainLayout() {
                             const authData = localStorage.getItem('adr_auth');
                             const { token } = authData ? JSON.parse(authData) : {};
 
-                            const response = await fetch('http://localhost:3001/api/auth/switch-back', {
+                            const response = await fetch('/api/auth/switch-back', {
                               method: 'POST',
                               headers: {
                                 'Authorization': `Bearer ${token}`

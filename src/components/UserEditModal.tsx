@@ -53,7 +53,7 @@ export function UserEditModal({ isOpen, onClose, onSuccess, user }: UserEditModa
         submitData.password = formData.password;
       }
 
-      const response = await fetch(`http://localhost:3001/api/users/${user?.id}`, {
+      const response = await fetch(`/api/users/${user?.id}`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${token}`,
