@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Search, RefreshCw, CheckCircle, XCircle, Eye, Clock, MapPin, Sparkles, Trash2, AlertCircle } from 'lucide-react';
+import { Search, RefreshCw, CheckCircle, XCircle, Eye, Clock, MapPin, Sparkles, Trash2 } from 'lucide-react';
 
 interface Review {
   id: number;

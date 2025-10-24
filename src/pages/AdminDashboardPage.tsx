@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Users, Coins, MapPin, CheckCircle, TrendingUp, Calendar, Clock, AlertCircle, FileText, Link as LinkIcon } from 'lucide-react';
+import { Users, Coins, MapPin, CheckCircle, Calendar, FileText, Link as LinkIcon } from 'lucide-react';
 
 // 관리자용 통계 타입
 interface AdminStats {
@@ -104,7 +104,6 @@ export function AdminDashboardPage() {
         };
 
       case 'thisMonth':
-        const firstDayOfMonth = new Date(year, month, 1);
         const lastDayOfMonth = new Date(year, month + 1, 0);
         return {
           startDate: `${year}-${String(month + 1).padStart(2, '0')}-01`,
@@ -565,6 +564,52 @@ export function AdminDashboardPage() {
   );
 }
 
+// 색상 variants 정의
+const colorVariants = {
+  green: {
+    bg: 'bg-green-100',
+    border: 'border-green-500',
+    icon: 'text-green-600',
+    text: 'text-green-600'
+  },
+  blue: {
+    bg: 'bg-blue-100',
+    border: 'border-blue-500',
+    icon: 'text-blue-600',
+    text: 'text-blue-600'
+  },
+  orange: {
+    bg: 'bg-orange-100',
+    border: 'border-orange-500',
+    icon: 'text-orange-600',
+    text: 'text-orange-600'
+  },
+  yellow: {
+    bg: 'bg-yellow-100',
+    border: 'border-yellow-500',
+    icon: 'text-yellow-600',
+    text: 'text-yellow-600'
+  },
+  pink: {
+    bg: 'bg-pink-100',
+    border: 'border-pink-500',
+    icon: 'text-pink-600',
+    text: 'text-pink-600'
+  },
+  purple: {
+    bg: 'bg-purple-100',
+    border: 'border-purple-500',
+    icon: 'text-purple-600',
+    text: 'text-purple-600'
+  },
+  indigo: {
+    bg: 'bg-indigo-100',
+    border: 'border-indigo-500',
+    icon: 'text-indigo-600',
+    text: 'text-indigo-600'
+  }
+};
+
 // 통계 카드 컴포넌트
 interface StatCardProps {
   title: string;
@@ -572,7 +617,7 @@ interface StatCardProps {
   subtitle: string;
   icon: any;
   color: keyof typeof colorVariants;
-  colorVariants: any;
+  colorVariants: typeof colorVariants;
 }
 
 function StatCard({ title, value, subtitle, icon: Icon, color, colorVariants }: StatCardProps) {

@@ -1,19 +1,16 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate, Outlet } from 'react-router-dom';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { DeveloperSwitchButton } from '../components/DeveloperSwitchButton';
 import {
-  LayoutDashboard,
   Users,
   MapPin,
-  Megaphone,
   Bell,
   User,
   Menu,
   X,
   LogOut,
   Home,
-  CreditCard,
   BarChart3,
   Settings,
   AlertCircle,
@@ -25,7 +22,6 @@ import {
 export function MainLayout() {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [pointBalance, setPointBalance] = useState<number | null>(null);
 

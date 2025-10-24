@@ -4,12 +4,8 @@ import {
   FileText,
   Edit3,
   MapPin,
-  Coins,
-  Clock,
-  Filter,
   Search,
-  AlertCircle,
-  CheckCircle
+  AlertCircle
 } from 'lucide-react';
 
 interface WorkRequest {

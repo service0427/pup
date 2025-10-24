@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { X, Trash2, Upload, Image, Eye } from 'lucide-react';
+import { X, Upload, Eye } from 'lucide-react';
 
 interface Point {
   id?: number;
@@ -11,10 +11,10 @@ interface Point {
 interface PointsModalProps {
   isOpen: boolean;
   onClose: () => void;
-  receiptId: number | null;
+  receiptId?: number | null;
 }
 
-export function PointsModal({ isOpen, onClose, receiptId }: PointsModalProps) {
+export function PointsModal({ isOpen, onClose }: PointsModalProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImage, setSelectedImage] = useState<{ id?: number, file?: File, url?: string } | null>(null);
   const [newPointContent, setNewPointContent] = useState('');

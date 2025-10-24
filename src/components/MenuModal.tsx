@@ -10,10 +10,10 @@ interface MenuItem {
 interface MenuModalProps {
   isOpen: boolean;
   onClose: () => void;
-  receiptId: number | null;
+  receiptId?: number | null;
 }
 
-export function MenuModal({ isOpen, onClose, receiptId }: MenuModalProps) {
+export function MenuModal({ isOpen, onClose }: MenuModalProps) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
     { name: '', price: '', description: '' }
   ]);

@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
@@ -14,7 +13,6 @@ export function LoginModal({ isOpen, onClose, onSwitchToSignup }: LoginModalProp
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const navigate = useNavigate();
   const { login } = useAuth();
 
   if (!isOpen) return null;

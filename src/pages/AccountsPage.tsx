@@ -3,14 +3,12 @@ import {
   Users,
   UserPlus,
   Search,
-  Filter,
   MoreVertical,
   Edit,
   Trash2,
   ChevronDown,
   ChevronRight,
   UserCheck,
-  UserX,
   Shield,
   User
 } from 'lucide-react';
@@ -42,8 +40,6 @@ export function AccountsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterRole, setFilterRole] = useState<string>('');
   const [filterStatus, setFilterStatus] = useState<string>('');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserAccount | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<number>>(new Set());
 
   useEffect(() => {
@@ -125,7 +121,7 @@ export function AccountsPage() {
     );
   };
 
-  const renderUserRow = (user: UserAccount, level: number = 0) => {
+  const renderUserRow = (user: UserAccount, level: number = 0): JSX.Element => {
     const hasSubordinates = user.subordinate_count > 0;
     const isExpanded = expandedRows.has(user.id);
 
@@ -204,7 +200,7 @@ export function AccountsPage() {
           <td className="px-6 py-4">
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setSelectedUser(user)}
+                onClick={() => console.log('Edit user not implemented', user)}
                 className="p-1 text-gray-600 hover:text-gray-900"
               >
                 <Edit className="w-4 h-4" />
@@ -277,7 +273,7 @@ export function AccountsPage() {
           </select>
 
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => console.log('Create modal not implemented')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
           >
             <UserPlus className="w-5 h-5" />

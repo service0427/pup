@@ -4,7 +4,6 @@ import { useAuth } from '../hooks/useAuth';
 
 export function ProfilePage() {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
   // 이름 변경

@@ -3,7 +3,6 @@ import {
   Users,
   UserPlus,
   Search,
-  MoreVertical,
   Edit,
   Trash2,
   ChevronDown,
@@ -11,8 +10,7 @@ import {
   Shield,
   User,
   Loader2,
-  LogIn,
-  LogOut
+  LogIn
 } from 'lucide-react';
 import { UserCreateModal } from '../components/UserCreateModal';
 import { UserEditModal } from '../components/UserEditModal';
@@ -50,7 +48,7 @@ interface SubordinateState {
 }
 
 export function AccountsPageV2() {
-  const { user, login } = useAuth();
+  const { user } = useAuth();
   const [users, setUsers] = useState<UserAccount[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -275,43 +273,6 @@ export function AccountsPageV2() {
     }
   };
 
-  // 원래 계정으로 복귀
-  const handleSwitchBack = async () => {
-    if (!confirm('원래 개발자 계정으로 복귀하시겠습니까?')) {
-      return;
-    }
-
-    try {
-      setSwitchingUser(true);
-      const authData = localStorage.getItem('adr_auth');
-      const { token } = authData ? JSON.parse(authData) : {};
-
-      const response = await fetch('http://localhost:3001/api/auth/switch-back', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        // 개발자 계정으로 다시 로그인
-        login(data.data.user.username, '', data.data.token, data.data.user);
-
-        // 페이지 새로고침
-        window.location.reload();
-      } else {
-        alert(data.message || '계정 복귀에 실패했습니다.');
-      }
-    } catch (error) {
-      console.error('계정 복귀 실패:', error);
-      alert('계정 복귀 중 오류가 발생했습니다.');
-    } finally {
-      setSwitchingUser(false);
-    }
-  };
-
   // 사용자 삭제
   const handleDeleteUser = async (targetUser: UserAccount) => {
     if (!confirm(`정말로 ${targetUser.name}(${targetUser.username}) 사용자를 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`)) {
@@ -447,7 +408,7 @@ export function AccountsPageV2() {
           <td className="px-6 py-4">
             <div className="flex items-center gap-2">
               {/* 개발자 권한일 때만 사용자 전환 버튼 표시 */}
-              {user?.role === 'developer' && userAccount.id !== user.id && (
+              {user?.role === 'developer' && userAccount.id !== Number(user.id) && (
                 <button
                   onClick={() => handleSwitchUser(userAccount)}
                   disabled={switchingUser}
@@ -666,7 +627,7 @@ export function AccountsPageV2() {
           setExpandedRows(new Set());
           fetchUsers();
         }}
-        currentUser={user}
+        currentUser={user ? { role: user.role, id: Number(user.id), name: user.name, username: user.username } : undefined}
       />
 
       {/* 사용자 수정 모달 */}

@@ -1,23 +1,20 @@
 import { useState, useEffect, useRef } from 'react';
 import {
-  FileText,
   Plus,
   Search,
   Download,
   Trash2,
   Eye,
   Edit,
-  Calendar,
   AlertCircle,
   MoreVertical,
   Copy,
   Pause,
-  Play,
-  RefreshCw
+  Play
 } from 'lucide-react';
-import { AdCreateModal } from '../components/AdCreateModal';
-import { AdEditModal } from '../components/AdEditModal';
-import { ReceiptReviewsModal } from '../components/ReceiptReviewsModal';
+// import { AdCreateModal } from '../components/AdCreateModal';
+// import { AdEditModal } from '../components/AdEditModal';
+// import { ReceiptReviewsModal } from '../components/ReceiptReviewsModal';
 import { MenuModal } from '../components/MenuModal';
 import { HoursModal } from '../components/HoursModal';
 import { PointsModal } from '../components/PointsModal';
@@ -74,11 +71,6 @@ export function ReceiptsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('all');
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showReviewsModal, setShowReviewsModal] = useState(false);
-  const [selectedReceipt, setSelectedReceipt] = useState<Receipt | null>(null);
-  const [editingReceipt, setEditingReceipt] = useState<Receipt | null>(null);
   const [showMenuModal, setShowMenuModal] = useState(false);
   const [showHoursModal, setShowHoursModal] = useState(false);
   const [showPointsModal, setShowPointsModal] = useState(false);
@@ -166,11 +158,13 @@ export function ReceiptsPage() {
   };
 
   const handleEdit = (receipt: Receipt) => {
-    setEditingReceipt(receipt);
-    setShowEditModal(true);
+    // setEditingReceipt(receipt);
+    // setShowEditModal(true);
+    console.log('Edit modal not implemented', receipt);
     setOpenDropdown(null);
   };
 
+  /* Unused - modal commented out
   const handleEditSave = async (updatedReceipt: Partial<Receipt>) => {
     try {
       const authData = localStorage.getItem('adr_auth');
@@ -188,14 +182,13 @@ export function ReceiptsPage() {
       if (response.ok) {
         fetchReceipts();
         alert('광고가 수정되었습니다.');
-        setShowEditModal(false);
-        setEditingReceipt(null);
       }
     } catch (error) {
       console.error('Failed to update receipt:', error);
       alert('광고 수정에 실패했습니다.');
     }
   };
+  */
 
   const handleDuplicate = async (receipt: Receipt) => {
     try {
@@ -203,17 +196,14 @@ export function ReceiptsPage() {
       const { token } = authData ? JSON.parse(authData) : {};
 
       // 복제할 데이터 준비 (ID 제외)
+      const { id, created_at, review_count, days_remaining, ...restReceipt } = receipt;
       const duplicateData = {
-        ...receipt,
+        ...restReceipt,
         business_name: `${receipt.business_name} (복사본)`,
         daily_issued: 0,
         total_issued: 0,
         status: 'pending'
       };
-      delete duplicateData.id;
-      delete duplicateData.created_at;
-      delete duplicateData.review_count;
-      delete duplicateData.days_remaining;
 
       const response = await fetch('http://localhost:3001/api/receipts', {
         method: 'POST',
@@ -261,6 +251,7 @@ export function ReceiptsPage() {
     setOpenDropdown(null);
   };
 
+  /* Unused functions
   const getStatusBadge = (status: string) => {
     const badges = {
       active: { bg: 'bg-green-100', text: 'text-green-700', label: '진행' },
@@ -283,6 +274,7 @@ export function ReceiptsPage() {
       <span className="text-gray-400">미동록</span>
     );
   };
+  */
 
   const tabs = [
     { key: 'all', label: '전체', count: receipts.length },
@@ -344,7 +336,7 @@ export function ReceiptsPage() {
             액셀 다운
           </button>
           <button
-            onClick={() => setShowCreateModal(true)}
+            onClick={() => console.log('Create modal not implemented')}
             className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
           >
             <Plus className="w-5 h-5" />
@@ -492,9 +484,9 @@ export function ReceiptsPage() {
                   </td>
                   <td className="px-4 py-4 text-center">
                     <span className={`inline-flex px-2 py-1 text-xs rounded-full ${
-                      receipt.total_issued >= receipt.total_limit ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+                      receipt.total_limit && receipt.total_issued >= receipt.total_limit ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
                     }`}>
-                      {receipt.total_issued} / {receipt.total_limit}
+                      {receipt.total_issued} / {receipt.total_limit || 0}
                     </span>
                   </td>
                   <td className="px-4 py-4 text-center">
@@ -505,8 +497,7 @@ export function ReceiptsPage() {
                   <td className="px-4 py-4 text-center">
                     <button
                       onClick={() => {
-                        setSelectedReceipt(receipt);
-                        setShowReviewsModal(true);
+                        console.log('Reviews modal not implemented', receipt);
                       }}
                       className="text-blue-600 hover:text-blue-800"
                     >
@@ -599,23 +590,23 @@ export function ReceiptsPage() {
       </div>
 
       {/* 모달들 */}
-      <AdCreateModal
+      {/* <AdCreateModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSuccess={() => {
           setShowCreateModal(false);
           fetchReceipts();
         }}
-      />
+      /> */}
 
-      <ReceiptReviewsModal
+      {/* <ReceiptReviewsModal
         isOpen={showReviewsModal}
         onClose={() => {
           setShowReviewsModal(false);
           setSelectedReceipt(null);
         }}
         receipt={selectedReceipt}
-      />
+      /> */}
 
       <MenuModal
         isOpen={showMenuModal}
@@ -644,7 +635,7 @@ export function ReceiptsPage() {
         receiptId={currentReceiptId}
       />
 
-      <AdEditModal
+      {/* <AdEditModal
         isOpen={showEditModal}
         onClose={() => {
           setShowEditModal(false);
@@ -652,7 +643,7 @@ export function ReceiptsPage() {
         }}
         receipt={editingReceipt}
         onSave={handleEditSave}
-      />
+      /> */}
     </div>
   );
 }

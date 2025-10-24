@@ -11,10 +11,10 @@ interface DayHours {
 interface HoursModalProps {
   isOpen: boolean;
   onClose: () => void;
-  receiptId: number | null;
+  receiptId?: number | null;
 }
 
-export function HoursModal({ isOpen, onClose, receiptId }: HoursModalProps) {
+export function HoursModal({ isOpen, onClose }: HoursModalProps) {
   const [hours, setHours] = useState<DayHours[]>([
     { day: '일', startTime: '15:00', endTime: '07:00', isClosed: false },
     { day: '월', startTime: '15:00', endTime: '07:00', isClosed: false },

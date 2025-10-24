@@ -19,7 +19,6 @@ import {
   CheckCircle,
   AlertCircle,
   Coins,
-  ExternalLink,
   RotateCcw
 } from 'lucide-react';
 import { ReviewCreateModal } from '../components/ReviewCreateModal';
@@ -70,12 +69,6 @@ interface PointBalance {
   pending_points: number;
   total_earned: number;
   total_spent: number;
-}
-
-interface ReviewFormData {
-  review_text: string;
-  images: string[];
-  auto_generate_image: boolean;
 }
 
 export function PlaceDetailPage() {
@@ -591,7 +584,7 @@ export function PlaceDetailPage() {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {reviews.slice(0, 5).map((review, idx) => (
+                  {reviews.slice(0, 5).map((review) => (
                     <div key={review.id} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-sm transition-shadow">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">

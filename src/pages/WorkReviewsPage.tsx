@@ -4,7 +4,6 @@ import {
   CheckCircle,
   XCircle,
   Eye,
-  Calendar,
   DollarSign,
   User,
   MessageSquare,
@@ -12,9 +11,7 @@ import {
   Search,
   Loader2,
   AlertCircle,
-  ExternalLink,
-  FileText,
-  Star
+  ExternalLink
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 

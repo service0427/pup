@@ -4,16 +4,10 @@ import {
   TrendingDown,
   Calendar,
   DollarSign,
-  Filter,
-  Search,
   Loader2,
   AlertCircle,
-  Users,
-  BarChart3,
-  CreditCard,
   ArrowUpCircle,
   ArrowDownCircle,
-  Award,
   UserCheck,
   Settings,
   ArrowLeft,
@@ -57,6 +51,7 @@ interface PointTransaction {
   request_purpose: string | null;
 }
 
+/* Unused interface
 interface PointStatistics {
   total_stats: {
     total_available: number;
@@ -85,13 +80,13 @@ interface PointStatistics {
     transaction_count: number;
   }>;
 }
+*/
 
 export function PointHistoryPage() {
   const { user } = useAuth();
   const [balance, setBalance] = useState<PointBalance | null>(null);
   const [transactions, setTransactions] = useState<PointTransaction[]>([]);
   const [allTransactions, setAllTransactions] = useState<PointTransaction[]>([]); // 전체 거래내역 (회수 포인트 계산용)
-  const [statistics, setStatistics] = useState<PointStatistics | null>(null);
   const [balances, setBalances] = useState<PointBalance[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -209,29 +204,6 @@ export function PointHistoryPage() {
       }
     } catch (error) {
       console.error('포인트 거래 내역 조회 실패:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchStatistics = async () => {
-    try {
-      setLoading(true);
-      const authData = localStorage.getItem('adr_auth');
-      const { token } = authData ? JSON.parse(authData) : {};
-
-      const response = await fetch('http://localhost:3001/api/points/statistics', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setStatistics(data.data);
-      }
-    } catch (error) {
-      console.error('포인트 통계 조회 실패:', error);
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,6 @@ import {
   Download,
   Trash2,
   RefreshCw,
-  Calendar,
   ExternalLink
 } from 'lucide-react';
 import { DeleteRequestModal } from '../components/DeleteRequestModal';
@@ -458,25 +457,22 @@ export function ReviewsPage() {
       </div>
 
       {/* 삭제 요청 모달 */}
-      <DeleteRequestModal
-        isOpen={showDeleteModal}
-        onClose={() => {
-          setShowDeleteModal(false);
-          setSelectedReview(null);
-        }}
-        onSubmit={(date, reason) => {
-          if (selectedReview) {
-            handleDeleteRequestSubmit(selectedReview.id, date, reason);
-          }
-          setShowDeleteModal(false);
-          setSelectedReview(null);
-        }}
-        reviewInfo={selectedReview ? {
-          id: selectedReview.id,
-          advertiserName: selectedReview.advertiser_name,
-          content: selectedReview.review_content
-        } : null}
-      />
+      {selectedReview && (
+        <DeleteRequestModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setSelectedReview(null);
+          }}
+          onSuccess={() => {
+            fetchReviews();
+            setShowDeleteModal(false);
+            setSelectedReview(null);
+          }}
+          reviewId={selectedReview.id}
+          placeName={selectedReview.advertiser_name}
+        />
+      )}
     </div>
   );
 }

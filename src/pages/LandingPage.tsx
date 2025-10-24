@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Menu,
   X,
@@ -7,9 +7,7 @@ import {
   FileText,
   CreditCard,
   ChevronRight,
-  UserPlus,
   LogIn,
-  Check,
   ArrowRight,
   Star,
   TrendingUp,
@@ -22,7 +20,6 @@ export function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showSignupModal, setShowSignupModal] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const navigate = useNavigate();
   const location = useLocation();
 
   // /admin에서 리다이렉트된 경우 자동으로 로그인 모달 열기

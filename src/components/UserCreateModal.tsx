@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X, User, Shield, Users } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface UserCreateModalProps {
   isOpen: boolean;
@@ -13,7 +13,7 @@ interface UserCreateModalProps {
   };
 }
 
-export function UserCreateModal({ isOpen, onClose, onSuccess, currentUser }: UserCreateModalProps) {
+export function UserCreateModal({ isOpen, onClose, onSuccess }: UserCreateModalProps) {
   const [formData, setFormData] = useState({
     username: '',
     password: '',

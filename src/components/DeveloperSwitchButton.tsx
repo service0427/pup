@@ -1,8 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../hooks/useAuth';
 
 export function DeveloperSwitchButton() {
-  const { login } = useAuth();
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
