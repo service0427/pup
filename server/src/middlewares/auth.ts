@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import pool from '../config/database';
+import { JWT_CONFIG } from '../config/jwt';
 
 export interface AuthRequest extends Request {
   user?: any;
@@ -20,7 +21,7 @@ export const authenticateToken = async (req: AuthRequest, res: Response, next: N
     }
 
     // 토큰 검증
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'adr-secret-key-2024') as any;
+    const decoded = jwt.verify(token, JWT_CONFIG.secret) as any;
 
     // 사용자 확인 (계층 정보 포함)
     const result = await pool.query(

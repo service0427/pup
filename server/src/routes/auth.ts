@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../config/database';
 import { authenticateToken } from '../middlewares/auth';
+import { JWT_CONFIG } from '../config/jwt';
 
 const router = Router();
 
@@ -157,9 +158,9 @@ router.post('/login', async (req: Request, res: Response) => {
         username: user.username,
         role: user.role
       },
-      process.env.JWT_SECRET || 'adr-secret-key-2024',
+      JWT_CONFIG.secret,
       {
-        expiresIn: process.env.JWT_EXPIRES_IN || '24h'
+        expiresIn: JWT_CONFIG.expiresIn
       }
     );
 
@@ -299,9 +300,9 @@ router.post('/switch-user', authenticateToken, async (req: any, res: Response) =
         role: targetUser.role,
         switched_from: currentUserId // 개발자 ID 저장
       },
-      process.env.JWT_SECRET || 'adr-secret-key-2024',
+      JWT_CONFIG.secret,
       {
-        expiresIn: process.env.JWT_EXPIRES_IN || '24h'
+        expiresIn: JWT_CONFIG.expiresIn
       }
     );
 
@@ -399,9 +400,9 @@ router.post('/switch-back', authenticateToken, async (req: any, res: Response) =
         username: developerUser.username,
         role: developerUser.role
       },
-      process.env.JWT_SECRET || 'adr-secret-key-2024',
+      JWT_CONFIG.secret,
       {
-        expiresIn: process.env.JWT_EXPIRES_IN || '24h'
+        expiresIn: JWT_CONFIG.expiresIn
       }
     );
 
@@ -458,7 +459,7 @@ router.get('/verify', async (req: Request, res: Response) => {
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'adr-secret-key-2024') as any;
+    const decoded = jwt.verify(token, JWT_CONFIG.secret) as any;
 
     // 사용자 정보 조회
     const result = await pool.query(
