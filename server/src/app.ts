@@ -17,7 +17,9 @@ app.use(cors({
     'http://localhost:5173',
     'http://localhost:5174',
     'http://localhost:5175',
-    'http://localhost:5176'
+    'http://localhost:5176',
+    'http://placeup.cafe24.com',
+    'https://placeup.cafe24.com'
   ],
   credentials: true
 }));
