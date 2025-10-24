@@ -3,7 +3,7 @@ module.exports = {
     name: 'place-up-api',
     script: './dist/app.js',
     instances: 1,
-    exec_mode: 'cluster',
+    exec_mode: 'fork',
 
     // 환경 변수
     env_production: {
