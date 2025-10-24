@@ -9,6 +9,8 @@
 @layer base {
   html {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif !important;
+    /* 전체 UI 크기 조정: 기본 16px → 12px (75% 크기) */
+    font-size: 12px;
   }
 }
 
@@ -52,15 +54,10 @@ h1, h2, h3, h4, h5, h6 {
   line-height: 1.2;
 }
 
-h1 { font-size: 2.5rem; font-weight: 700; }
-h2 { font-size: 2rem; font-weight: 600; }
-h3 { font-size: 1.75rem; font-weight: 600; }
-
 /* 버튼 폰트 최적화 */
 button {
   font-weight: 500;
   letter-spacing: -0.016em;
-  font-size: 1rem;
 }
 
 /* 입력 필드 폰트 최적화 */
