@@ -93,5 +93,75 @@ FROM users u
 LEFT JOIN point_balances pb ON u.id = pb.user_id
 WHERE u.role = 'distributor' AND u.status = 'active';
 
+-- 6. initialize_user_points 함수
+CREATE OR REPLACE FUNCTION initialize_user_points(user_id_param INTEGER)
+RETURNS VOID
+LANGUAGE plpgsql
+AS $function$
+BEGIN
+    INSERT INTO point_balances (user_id, available_points, pending_points, total_earned, total_spent)
+    VALUES (user_id_param, 0, 0, 0, 0)
+    ON CONFLICT (user_id) DO NOTHING;
+END;
+$function$;
+
+-- 7. create_point_transaction 함수
+CREATE OR REPLACE FUNCTION create_point_transaction(
+    user_id_param INTEGER,
+    transaction_type_param VARCHAR,
+    amount_param INTEGER,
+    description_param TEXT,
+    related_work_id_param INTEGER DEFAULT NULL,
+    related_request_id_param INTEGER DEFAULT NULL,
+    processed_by_param INTEGER DEFAULT NULL
+)
+RETURNS INTEGER
+LANGUAGE plpgsql
+AS $function$
+DECLARE
+    current_balance INTEGER;
+    new_balance INTEGER;
+    transaction_id INTEGER;
+BEGIN
+    -- 현재 잔액 조회
+    SELECT available_points INTO current_balance
+    FROM point_balances
+    WHERE user_id = user_id_param;
+
+    -- 사용자 포인트 잔액이 없으면 초기화
+    IF current_balance IS NULL THEN
+        PERFORM initialize_user_points(user_id_param);
+        current_balance := 0;
+    END IF;
+
+    new_balance := current_balance + amount_param;
+
+    -- 잔액이 음수가 되는 것을 방지
+    IF new_balance < 0 THEN
+        RAISE EXCEPTION '포인트 잔액이 부족합니다. 현재: %, 요청: %', current_balance, amount_param;
+    END IF;
+
+    -- 포인트 잔액 업데이트
+    UPDATE point_balances
+    SET
+        available_points = new_balance,
+        total_earned = CASE WHEN amount_param > 0 THEN total_earned + amount_param ELSE total_earned END,
+        total_spent = CASE WHEN amount_param < 0 THEN total_spent + ABS(amount_param) ELSE total_spent END,
+        updated_at = CURRENT_TIMESTAMP
+    WHERE user_id = user_id_param;
+
+    -- 트랜잭션 기록 생성
+    INSERT INTO point_transactions (
+        user_id, transaction_type, amount, balance_before, balance_after,
+        related_work_id, related_request_id, description, processed_by
+    ) VALUES (
+        user_id_param, transaction_type_param, amount_param, current_balance, new_balance,
+        related_work_id_param, related_request_id_param, description_param, processed_by_param
+    ) RETURNING id INTO transaction_id;
+
+    RETURN transaction_id;
+END;
+$function$;
+
 -- 완료 메시지
 SELECT '✅ 모든 테이블, 함수, 뷰가 성공적으로 생성되었습니다!' AS result;
