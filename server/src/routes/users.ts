@@ -248,6 +248,16 @@ router.post('/', authenticateToken, async (req: any, res) => {
       ) RETURNING id, username, name, role, tier_level, parent_id, path
     `, [username, passwordHash, name, role, actualParentId]);
 
+    const newUserId = result.rows[0].id;
+
+    // 포인트 잔액 초기화 (advertiser, writer, distributor만)
+    if (['advertiser', 'writer', 'distributor'].includes(role)) {
+      await pool.query(`
+        INSERT INTO point_balances (user_id, available_points, pending_points, total_earned, total_spent)
+        VALUES ($1, 0, 0, 0, 0)
+      `, [newUserId]);
+    }
+
     res.status(201).json({
       success: true,
       message: '사용자가 생성되었습니다.',

@@ -16,5 +16,13 @@ export default defineConfig({
       '@/services': path.resolve(__dirname, './src/services'),
       '@/adapters': path.resolve(__dirname, './src/adapters')
     }
+  },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true
+      }
+    }
   }
 })

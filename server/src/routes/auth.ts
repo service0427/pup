@@ -69,12 +69,20 @@ router.post('/signup', async (req: Request, res: Response) => {
       'active'
     ]);
 
+    const newUserId = newUser.rows[0].id;
+
+    // 포인트 잔액 초기화 (writer는 포인트 사용 대상)
+    await pool.query(`
+      INSERT INTO point_balances (user_id, available_points, pending_points, total_earned, total_spent)
+      VALUES ($1, 0, 0, 0, 0)
+    `, [newUserId]);
+
     // 추천인 기록 (있을 경우)
     if (referrerId) {
       await pool.query(
         `INSERT INTO user_referrals (user_id, referrer_id, created_at)
          VALUES ($1, $2, CURRENT_TIMESTAMP)`,
-        [newUser.rows[0].id, referrerId]
+        [newUserId, referrerId]
       );
     }
 
